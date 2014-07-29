@@ -12,7 +12,7 @@ define( function ( require ) {
         var count = unprocessedStack.shift(),
             params = ScriptExtractor.exec( unprocessedStack );
 
-        if ( params.expr && params.expr.type === FN_TYPE ) {
+        if ( params.expr && params.expr.type === FN_TYPE && params.expr.handler ) {
 
             params.expr = params.expr.handler( params.expr, processedStack, unprocessedStack );
 

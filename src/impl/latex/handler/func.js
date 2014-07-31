@@ -11,6 +11,10 @@ define( function ( require ) {
 
         var params = ScriptExtractor.exec( unprocessedStack );
 
+        if ( params.expr && params.expr.handler && params.expr.name === "integration" ) {
+            params.expr = params.expr.handler( params.expr, processedStack, [ unprocessedStack.shift() ] );
+        }
+
         info.operand = [ info.params, params.expr, params.superscript, params.subscript ];
         delete info.params;
         delete info.handler;

@@ -14,6 +14,13 @@ define( function () {
             throw new Error( "Frac: Syntax Error" );
         }
 
+        if ( numerator.handler && numerator.name === "integration" ) {
+            numerator = numerator.handler( numerator, processedStack, [ denominator ] );
+            denominator = unprocessedStack.shift();
+        } else if ( denominator.handler && denominator.name === "integration" ) {
+            denominator = denominator.handler( denominator, processedStack, [ unprocessedStack.shift() ] );
+        }
+
         info.operand = [ numerator, denominator ];
 
         delete info.handler;

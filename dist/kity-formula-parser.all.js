@@ -1,6 +1,6 @@
 /*!
  * ====================================================
- * Kity Formula Parser - v1.0.0 - 2014-07-29
+ * Kity Formula Parser - v1.0.0 - 2014-07-31
  * https://github.com/HanCong03/kityformula-editor
  * GitHub: https://github.com/kitygraph/kityformula-editor.git 
  * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
@@ -594,6 +594,12 @@ _p[14] = {
             if (numerator === undefined || denominator === undefined) {
                 throw new Error("Frac: Syntax Error");
             }
+            if (numerator.handler && numerator.name === "integration") {
+                numerator = numerator.handler(numerator, processedStack, [ denominator ]);
+                denominator = unprocessedStack.shift();
+            } else if (denominator.handler && denominator.name === "integration") {
+                denominator = denominator.handler(denominator, processedStack, [ unprocessedStack.shift() ]);
+            }
             info.operand = [ numerator, denominator ];
             delete info.handler;
             return info;
@@ -610,6 +616,9 @@ _p[15] = {
         // 处理函数接口
         return function(info, processedStack, unprocessedStack) {
             var params = ScriptExtractor.exec(unprocessedStack);
+            if (params.expr && params.expr.handler && params.expr.name === "integration") {
+                params.expr = params.expr.handler(params.expr, processedStack, [ unprocessedStack.shift() ]);
+            }
             info.operand = [ info.params, params.expr, params.superscript, params.subscript ];
             delete info.params;
             delete info.handler;
@@ -626,8 +635,8 @@ _p[16] = {
         var ScriptExtractor = _p.r(17), FN_TYPE = _p.r(11).FN;
         return function(info, processedStack, unprocessedStack) {
             var count = unprocessedStack.shift(), params = ScriptExtractor.exec(unprocessedStack);
-            if (params.expr && params.expr.type === FN_TYPE && params.expr.handler) {
-                params.expr = params.expr.handler(params.expr, processedStack, unprocessedStack);
+            if (params.expr && params.expr.type === FN_TYPE && params.expr.handler && params.expr.name === "integration") {
+                params.expr = params.expr.handler(params.expr, processedStack, [ unprocessedStack.shift() ]);
             }
             info.operand = [ params.expr, params.superscript, params.subscript ];
             // 参数配置调用
@@ -862,9 +871,12 @@ _p[23] = {
  */
 _p[24] = {
     value: function(require) {
-        var ScriptExtractor = _p.r(17);
+        var ScriptExtractor = _p.r(17), FN_TYPE = _p.r(11).FN;
         return function(info, processedStack, unprocessedStack) {
             var params = ScriptExtractor.exec(unprocessedStack);
+            if (params.expr && params.expr.type === FN_TYPE && params.expr.handler && params.expr.name === "integration") {
+                params.expr = params.expr.handler(params.expr, processedStack, [ unprocessedStack.shift() ]);
+            }
             info.operand = [ params.expr, params.superscript, params.subscript ];
             delete info.handler;
             return info;

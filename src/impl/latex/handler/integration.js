@@ -12,10 +12,8 @@ define( function ( require ) {
         var count = unprocessedStack.shift(),
             params = ScriptExtractor.exec( unprocessedStack );
 
-        if ( params.expr && params.expr.type === FN_TYPE && params.expr.handler ) {
-
-            params.expr = params.expr.handler( params.expr, processedStack, unprocessedStack );
-
+        if ( params.expr && params.expr.type === FN_TYPE && params.expr.handler && params.expr.name === "integration" ) {
+            params.expr = params.expr.handler( params.expr, processedStack, [ unprocessedStack.shift() ] );
         }
 
         info.operand = [ params.expr, params.superscript, params.subscript ];

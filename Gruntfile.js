@@ -126,6 +126,6 @@ module.exports = function (grunt) {
 
     // task list.
     grunt.registerTask( 'default', [ 'jshint' ] );
-    grunt.registerTask( 'build', [ 'jshint', 'dependence:replace', 'concat:full', 'uglify:minimize', 'clean' ] );
+    grunt.registerTask( 'build', [ 'dependence:replace', 'concat:full', 'uglify:minimize', 'clean' ] );
 
 };

@@ -17,6 +17,7 @@ define( function ( require ) {
     // data
     var leftChar = "\ufff8",
         rightChar = "\ufffc",
+        splitChar = "\ufeff",
         clearCharPattern = new RegExp( leftChar+"|"+rightChar, "g"),
         leftCharPattern = new RegExp( leftChar, "g" ),
         rightCharPattern = new RegExp( rightChar, "g" );
@@ -90,8 +91,12 @@ define( function ( require ) {
         // 格式化输入数据
         format: function ( input ) {
 
+            var pattern = new RegExp( splitChar, 'g' );
+
             // 清理多余的空格
             input = clearEmpty( input );
+
+            input = input.replace( pattern, "" ).replace( /\\\\/g, splitChar );
 
             // 处理输入的“{”和“}”
             input = input.replace( clearCharPattern, "" ).replace( /\\{/gi, leftChar ).replace( /\\}/gi, rightChar );
@@ -105,7 +110,7 @@ define( function ( require ) {
 
             }
 
-            return input;
+            return input.replace( pattern, "\\\\" );
 
         },
 
@@ -167,7 +172,9 @@ define( function ( require ) {
             var group = [],
                 groupStack = [ group ],
                 groupCount = 0,
-                bracketsCount = 0;
+                bracketsCount = 0,
+                casesCount = 0,
+                beginType = [];
 
             for ( var i = 0, len = units.length; i < len; i++ ) {
 
@@ -206,6 +213,41 @@ define( function ( require ) {
                         group = groupStack.pop();
                         break;
 
+                    case "\\begin":
+                        casesCount++;
+
+                        groupStack.push( group );
+                        // 进入两层
+                        group.push( [ [] ] );
+                        group = group[ group.length - 1 ][ 0 ];
+                        group.type = "begin";
+                        i += 2;
+                        beginType = [];
+
+                        while ( units[ i ] && ( units[ i ] !== '}' ) ) {
+                            beginType.push( units[ i ] );
+                            i++;
+                        }
+
+                        group.beginType = beginType.join( "" );
+                        break;
+
+                    case "\\end":
+                        casesCount--;
+                        // 读取右括号
+                        i += 2;
+                        beginType = [];
+                        while ( units[ i ] && ( units[ i ] !== '}' ) ) {
+                            beginType.push( units[ i ] );
+                            i++;
+                        }
+                        if ( group.beginType !== beginType.join( "" ) ) {
+                            throw new Error( "\\begin command error" );
+                        }
+                        group = groupStack.pop();
+                        break;
+
+
                     default:
                         group.push( units[i].replace( leftCharPattern, "\\{" ).replace( rightCharPattern, "\\}" ) );
                         break;
@@ -218,6 +260,10 @@ define( function ( require ) {
                 throw new Error( "Group Error!" );
             }
 
+            if ( casesCount !== 0 ) {
+                throw new Error( "Cases Error!" );
+            }
+
             if ( bracketsCount !== 0 ) {
                 throw new Error( "Brackets Error!" );
             }
@@ -228,9 +274,18 @@ define( function ( require ) {
 
         parseToStruct: function ( units ) {
 
-            var structs = [];
+            var structs = [],
+                tmp = null,
+                rows = [],
+                j = 0,
+                casesGroup = null,
+                casesUnits = null;
 
             for ( var i = 0, len = units.length; i < len; i++ ) {
+
+                if ( units[ i ] === null ) {
+                    continue;
+                }
 
                 if ( Utils.isArray( units[ i ] ) ) {
 
@@ -240,13 +295,161 @@ define( function ( require ) {
                         structs.push( Utils.getBracketsDefine( units[ i ].leftBrackets, units[ i ].rightBrackets ) );
                         // 处理内部表达式
                         structs.push( this.parseToStruct( units[ i ] ) );
+                    } else if ( units[ i ].type === "begin" && units[ i ].beginType === "cases" ) {
+
+                        tmp = [];
+                        j = 0;
+                        casesGroup = [];
+                        casesUnits = units[ i ];
+
+                        i++;
+
+                        while ( casesUnits[ j ] ) {
+
+                            if ( casesUnits[ j ] === "\\\\" ) {
+                                casesGroup.push( tmp );
+                                tmp = [];
+                            } else {
+                                tmp.push( casesUnits[ j ] );
+                            }
+
+                            j++;
+
+                        }
+
+                        casesGroup.push( tmp );
+
+                        structs.push( Utils.getCasesDefine( casesGroup.length ) );
+
+                        for ( var i = 0, len = casesGroup.length; i < len; i++ ) {
+                            structs.push( this.parseToStruct( casesGroup[ i ] ) );
+                        }
+
+                    } else if ( units[ i ].type === "begin" && ( units[ i ].beginType === "vmatrix" || units[ i ].beginType === "pmatrix" ) ) {
+
+                        var ctype = units[ i ].beginType;
+                        tmp = [];
+                        j = 0;
+                        casesGroup = [];
+                        casesUnits = units[ i ];
+
+                        rows = [];
+
+                        var index = 0;
+                        i++;
+
+                        while ( casesUnits[ j ] ) {
+
+                            if ( casesUnits[ j ] === "\\\\" ) {
+
+                                if ( !tmp[ index ] ) {
+                                    tmp[ index ] = [];
+                                }
+
+                                tmp[ index ].push( this.parseToStruct( rows ) );
+                                index = 0;
+                                rows = [];
+
+                            } else if ( casesUnits[ j ] === '&' ) {
+
+                                if ( !tmp[ index ] ) {
+                                    tmp[ index ] = [];
+                                }
+
+                                tmp[ index ].push( this.parseToStruct( rows ) );
+                                index++;
+                                rows = [];
+
+                            } else {
+                                rows.push( casesUnits[ j ] );
+                            }
+
+                            j++;
+
+                        }
+
+                        if ( !tmp[ index ] ) {
+                            tmp[ index ] = [];
+                        }
+
+                        tmp[ index ].push( this.parseToStruct( rows ) );
+
+                        casesGroup = tmp;
+
+                        structs.push( Utils.getMatrixDefine( casesGroup.length, casesGroup[ 0 ].length, ctype ) );
+
+                        for ( var i = 0, len = casesGroup[ 0 ].length; i < len; i++ ) {
+
+                            for ( var j = 0, jlen = casesGroup.length; j < jlen; j++ ) {
+                                structs.push( casesGroup[ j ][ i ] );
+                            }
+
+                        }
+
+                    } else if ( units[ i ].type === "begin" && units[ i ].beginType === "split" ) {
+
+                        var ctype = units[ i ].beginType;
+                        tmp = [];
+                        j = 0;
+                        casesGroup = [];
+                        casesUnits = units[ i ];
+
+                        rows = [];
+
+                        var index = 0;
+                        i++;
+
+                        while ( casesUnits[ j ] ) {
+
+                            if ( casesUnits[ j ] === "\\\\" ) {
+
+                                j++;
+
+                                tmp[ index ] = this.parseToStruct( rows );
+                                index++;
+                                rows = [];
+
+                            } else if ( casesUnits[ j ] === '&' ) {
+
+                                tmp[ index ] = this.parseToStruct( rows );
+                                index++;
+                                rows = [];
+
+                            } else {
+                                rows.push( casesUnits[ j ] );
+                            }
+
+                            j++;
+
+                        }
+
+                        tmp[ index ] = this.parseToStruct( rows );
+
+                        casesGroup = tmp;
+
+                        structs.push( Utils.getSplitDefine( casesGroup.length ) );
+
+                        for ( var i = 0, len = casesGroup.length; i < len; i++ ) {
+                            structs.push( casesGroup[ i ] );
+                        }
+
                     } else {
                         // 普通组
                         structs.push( this.parseToStruct( units[ i ] ) );
                     }
 
-                } else {
+                } else if ( units[ i ] === "\\underbrace" ) {
+
+                    // 跳过underbrace中的下标符号
                     structs.push( parseStruct( units[ i ] ) );
+
+                    units[ i + 2 ] = null;
+
+                } else {
+                    tmp = parseStruct( units[ i ] );
+                    if ( tmp ) {
+                        structs.push( tmp );
+                    }
                 }
 
             }
@@ -279,6 +482,11 @@ define( function ( require ) {
                 return Utils.getFuncDefine( str );
 
             default:
+
+                if ( /\\\s*$/.test( str ) ) {
+                    return "";
+                }
+
                 // text
                 return transformSpecialCharacters( str );
 
@@ -309,7 +517,7 @@ define( function ( require ) {
 
     function clearEmpty ( data ) {
 
-        return data.replace( /\\\s+/, "" ).replace( /\s*([^a-z0-9\s])\s*/gi, function ( match, symbol ) {
+        return data.replace( /\s*([^a-z0-9\s])\s*/gi, function ( match, symbol ) {
 
             return symbol;
 

@@ -14,7 +14,14 @@ define( function () {
         "]": t,
         "(": t,
         ")": t,
-        "|": t
+        "|": t,
+        ".": t,
+        "\\langle": t,
+        "\\rangle": t,
+        "\\lfloor": t,
+        "\\rfloor": t,
+        "\\lceil": t,
+        "\\rceil": t
     };
 
 } );

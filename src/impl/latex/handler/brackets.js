@@ -15,6 +15,10 @@ define( function ( require ) {
                 throw new Error( "Brackets: invalid params" );
             }
 
+            if ( info.params[ i ].length > 1 ) {
+                info.params[ i ] += "\\";
+            }
+
         }
 
         info.operand = info.params;

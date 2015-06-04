@@ -73,7 +73,7 @@ define( function () {
         objTree.operand = [];
 
         // 文本表达式已经不需要再处理了
-        if ( tree.name.indexOf( "text" ) === -1 ) {
+        if ( tree.name && tree.name.indexOf( "text" ) === -1 ) {
             // 处理操作数
             for ( var i = 0, len = operand.length; i < len; i++ ) {
 
@@ -121,7 +121,6 @@ define( function () {
 
             }
 
-
             // 包含有选区时， 需要修正一下偏移
             if ( cursorLocation.length === 2 ) {
                 selectInfo.endOffset -= 1;
@@ -142,7 +141,7 @@ define( function () {
         constructor = getConstructor( tree.name );
 
         if ( !constructor ) {
-            throw new Error( 'operator type error: not found ' + tree.operator );
+            throw new Error( 'operator type error: not found ' + tree.name );
         }
 
         ConstructorProxy = function () {};

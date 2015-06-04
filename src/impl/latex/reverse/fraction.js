@@ -6,7 +6,11 @@ define( function () {
 
     return function ( operands ) {
 
-        return "\\frac " + operands[0] + " " + operands[ 1 ];
+        if ( this.callFn ) {
+            return "\\dfrac " + operands[0] + " " + operands[ 1 ];
+        } else {
+            return "\\frac " + operands[0] + " " + operands[ 1 ];
+        }
 
     };
 

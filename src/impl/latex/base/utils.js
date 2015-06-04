@@ -49,6 +49,31 @@ define( function ( require ) {
 
             },
 
+            getCasesDefine: function ( params ) {
+
+                return Utils.extend( {
+                    params: params
+                }, OPERATOR_LIST.cases );
+
+            },
+
+            getMatrixDefine: function ( colCount, rowCount, name ) {
+
+                return Utils.extend( {
+                    colCount: colCount,
+                    rowCount: rowCount
+                }, OPERATOR_LIST[ name ] );
+
+            },
+
+            getSplitDefine: function ( params ) {
+
+                return Utils.extend( {
+                    params: params
+                }, OPERATOR_LIST.split )
+
+            },
+
             getBracketsDefine: function ( leftBrackets, rightBrackets ) {
 
                 return Utils.extend( {

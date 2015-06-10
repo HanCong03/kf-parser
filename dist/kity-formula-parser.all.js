@@ -1,9 +1,9 @@
 /*!
  * ====================================================
- * Kity Formula Parser - v1.0.0 - 2014-10-27
+ * Kity Formula Parser - v1.0.0 - 2015-06-10
  * https://github.com/HanCong03/kityformula-editor
  * GitHub: https://github.com/kitygraph/kityformula-editor.git 
- * Copyright (c) 2014 Baidu Kity Group; Licensed MIT
+ * Copyright (c) 2015 Baidu Kity Group; Licensed MIT
  * ====================================================
  */
 
@@ -599,9 +599,9 @@ _p[8] = {
     value: function(require) {
         return {
             // 积分预处理器
-            "int": _p.r(39),
+            "int": _p.r(40),
             // 引号预处理
-            quot: _p.r(40)
+            quot: _p.r(41)
         };
     }
 };
@@ -612,32 +612,32 @@ _p[8] = {
 _p[9] = {
     value: function(require) {
         return {
-            combination: _p.r(43),
-            fraction: _p.r(44),
-            dfraction: _p.r(44),
-            "function": _p.r(45),
-            integration: _p.r(47),
-            subscript: _p.r(61),
-            superscript: _p.r(63),
-            script: _p.r(58),
-            radical: _p.r(60),
-            summation: _p.r(62),
-            product: _p.r(57),
-            brackets: _p.r(41),
-            mathcal: _p.r(50),
-            mathfrak: _p.r(51),
-            mathbb: _p.r(48),
-            mathrm: _p.r(52),
-            mathbf: _p.r(49),
-            cases: _p.r(42),
-            split: _p.r(59),
-            textcircled: _p.r(64),
-            hat: _p.r(46),
-            pmod: _p.r(56),
-            overline: _p.r(54),
-            underbrace: _p.r(65),
-            overparen: _p.r(55),
-            matrix: _p.r(53)
+            combination: _p.r(44),
+            fraction: _p.r(45),
+            dfraction: _p.r(45),
+            "function": _p.r(46),
+            integration: _p.r(48),
+            subscript: _p.r(62),
+            superscript: _p.r(64),
+            script: _p.r(59),
+            radical: _p.r(61),
+            summation: _p.r(63),
+            product: _p.r(58),
+            brackets: _p.r(42),
+            mathcal: _p.r(51),
+            mathfrak: _p.r(52),
+            mathbb: _p.r(49),
+            mathrm: _p.r(53),
+            mathbf: _p.r(50),
+            cases: _p.r(43),
+            split: _p.r(60),
+            textcircled: _p.r(65),
+            hat: _p.r(47),
+            pmod: _p.r(57),
+            overline: _p.r(55),
+            underbrace: _p.r(66),
+            overparen: _p.r(56),
+            matrix: _p.r(54)
         };
     }
 };
@@ -1260,7 +1260,7 @@ _p[37] = {
 /* jshint forin: false */
 _p[38] = {
     value: function(require) {
-        var Parser = _p.r(67).Parser, LatexUtils = _p.r(1), PRE_HANDLER = _p.r(8), serialization = _p.r(66), OP_DEFINE = _p.r(7), REVERSE_DEFINE = _p.r(9), SPECIAL_LIST = _p.r(10), Utils = _p.r(4);
+        var Parser = _p.r(68).Parser, LatexUtils = _p.r(1), PRE_HANDLER = _p.r(8), serialization = _p.r(67), OP_DEFINE = _p.r(7), REVERSE_DEFINE = _p.r(9), SPECIAL_LIST = _p.r(10), Utils = _p.r(4);
         // data
         var leftChar = "￸", rightChar = "￼", splitChar = "﻿", clearCharPattern = new RegExp(leftChar + "|" + rightChar, "g"), leftCharPattern = new RegExp(leftChar, "g"), rightCharPattern = new RegExp(rightChar, "g");
         Parser.register("latex", Parser.implement({
@@ -1593,9 +1593,389 @@ _p[38] = {
 };
 
 /**
+ * Kity Formula Latex解析器实现
+ */
+/* jshint forin: false */
+_p[39] = {
+    value: function(require) {
+        var Parser = _p.r(68).Parser, LatexUtils = _p.r(1), PRE_HANDLER = _p.r(8), serialization = _p.r(67), OP_DEFINE = _p.r(7), REVERSE_DEFINE = _p.r(9), SPECIAL_LIST = _p.r(10), Utils = _p.r(4);
+        // data
+        var leftChar = "￸", rightChar = "￼", splitChar = "﻿", clearCharPattern = new RegExp(leftChar + "|" + rightChar, "g"), leftCharPattern = new RegExp(leftChar, "g"), rightCharPattern = new RegExp(rightChar, "g");
+        Parser.register("latex", Parser.implement({
+            parse: function(data) {
+                var units = this.split(this.format(data));
+                units = this.parseToGroup(units);
+                debugger;
+                units = this.parseToStruct(units);
+                return this.generateTree(units);
+            },
+            serialization: function(tree, options) {
+                return serialization(tree, options);
+            },
+            expand: function(expandObj) {
+                var parseObj = expandObj.parse, formatKey = null, preObj = expandObj.pre, reverseObj = expandObj.reverse;
+                for (var key in parseObj) {
+                    if (!parseObj.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    formatKey = key.replace(/\\/g, "");
+                    OP_DEFINE[formatKey] = parseObj[key];
+                }
+                for (var key in reverseObj) {
+                    if (!reverseObj.hasOwnProperty(key)) {
+                        continue;
+                    }
+                    REVERSE_DEFINE[key.replace(/\\/g, "")] = reverseObj[key];
+                }
+                // 预处理
+                if (preObj) {
+                    for (var key in preObj) {
+                        if (!preObj.hasOwnProperty(key)) {
+                            continue;
+                        }
+                        PRE_HANDLER[key.replace(/\\/g, "")] = preObj[key];
+                    }
+                }
+            },
+            // 格式化输入数据
+            format: function(input) {
+                var pattern = new RegExp(splitChar, "g");
+                // 清理多余的空格
+                input = clearEmpty(input);
+                input = input.replace(pattern, "").replace(/\\\\/g, splitChar);
+                // 处理输入的“{”和“}”
+                input = input.replace(clearCharPattern, "").replace(/\\{/gi, leftChar).replace(/\\}/gi, rightChar);
+                // 预处理器处理
+                for (var key in PRE_HANDLER) {
+                    if (PRE_HANDLER.hasOwnProperty(key)) {
+                        input = PRE_HANDLER[key](input);
+                    }
+                }
+                return input.replace(pattern, "\\\\");
+            },
+            split: function(data) {
+                var units = [], pattern = /(?:\\[^a-z]\s*)|(?:\\[a-z]+\s*)|(?:[{}]\s*)|(?:[^\\{}]\s*)/gi, emptyPattern = /^\s+|\s+$/g, match = null;
+                data = data.replace(emptyPattern, "");
+                while (match = pattern.exec(data)) {
+                    match = match[0].replace(emptyPattern, "");
+                    if (match) {
+                        units.push(match);
+                    }
+                }
+                return units;
+            },
+            /**
+         * 根据解析出来的语法单元生成树
+         * @param units 单元
+         * @return 生成的树对象
+         */
+            generateTree: function(units) {
+                var tree = [], currentUnit = null;
+                // 递归处理
+                while (currentUnit = units.shift()) {
+                    if (Utils.isArray(currentUnit)) {
+                        tree.push(this.generateTree(currentUnit));
+                    } else {
+                        tree.push(currentUnit);
+                    }
+                }
+                tree = LatexUtils.toRPNExpression(tree);
+                return LatexUtils.generateTree(tree);
+            },
+            parseToGroup: function(units) {
+                var group = [], groupStack = [ group ], groupCount = 0, bracketsCount = 0, casesCount = 0, beginType = [];
+                for (var i = 0, len = units.length; i < len; i++) {
+                    switch (units[i]) {
+                      case "{":
+                        groupCount++;
+                        groupStack.push(group);
+                        group.push([]);
+                        group = group[group.length - 1];
+                        break;
+
+                      case "}":
+                        groupCount--;
+                        group = groupStack.pop();
+                        break;
+
+                      // left-right分组
+                        case "\\left":
+                        bracketsCount++;
+                        groupStack.push(group);
+                        // 进入两层
+                        group.push([ [] ]);
+                        group = group[group.length - 1][0];
+                        group.type = "brackets";
+                        // 读取左括号
+                        i++;
+                        group.leftBrackets = units[i].replace(leftCharPattern, "{").replace(rightCharPattern, "}");
+                        break;
+
+                      case "\\right":
+                        bracketsCount--;
+                        // 读取右括号
+                        i++;
+                        group.rightBrackets = units[i].replace(leftCharPattern, "{").replace(rightCharPattern, "}");
+                        group = groupStack.pop();
+                        break;
+
+                      case "\\begin":
+                        casesCount++;
+                        groupStack.push(group);
+                        // 进入两层
+                        group.push([ [] ]);
+                        group = group[group.length - 1][0];
+                        group.type = "begin";
+                        i += 2;
+                        beginType = [];
+                        while (units[i] && units[i] !== "}") {
+                            beginType.push(units[i]);
+                            i++;
+                        }
+                        group.beginType = beginType.join("");
+                        break;
+
+                      case "\\end":
+                        casesCount--;
+                        // 读取右括号
+                        i += 2;
+                        beginType = [];
+                        while (units[i] && units[i] !== "}") {
+                            beginType.push(units[i]);
+                            i++;
+                        }
+                        if (group.beginType !== beginType.join("")) {
+                            throw new Error("\\begin command error");
+                        }
+                        group = groupStack.pop();
+                        break;
+
+                      default:
+                        group.push(units[i].replace(leftCharPattern, "\\{").replace(rightCharPattern, "\\}"));
+                        break;
+                    }
+                }
+                if (groupCount !== 0) {
+                    throw new Error("Group Error!");
+                }
+                if (casesCount !== 0) {
+                    throw new Error("Cases Error!");
+                }
+                if (bracketsCount !== 0) {
+                    throw new Error("Brackets Error!");
+                }
+                return groupStack[0];
+            },
+            parseToStruct: function(units) {
+                var structs = [], tmp = null, rows = [], j = 0, casesGroup = null, casesUnits = null;
+                for (var i = 0, len = units.length; i < len; i++) {
+                    if (units[i] === null) {
+                        continue;
+                    }
+                    if (Utils.isArray(units[i])) {
+                        if (units[i].type === "brackets") {
+                            // 处理自动调整大小的括号组
+                            // 获取括号组定义
+                            structs.push(Utils.getBracketsDefine(units[i].leftBrackets, units[i].rightBrackets));
+                            // 处理内部表达式
+                            structs.push(this.parseToStruct(units[i]));
+                        } else if (units[i].type === "begin" && units[i].beginType === "cases") {
+                            tmp = [];
+                            j = 0;
+                            casesGroup = [];
+                            casesUnits = units[i];
+                            i++;
+                            while (casesUnits[j]) {
+                                if (casesUnits[j] === "\\\\") {
+                                    casesGroup.push(tmp);
+                                    tmp = [];
+                                } else {
+                                    tmp.push(casesUnits[j]);
+                                }
+                                j++;
+                            }
+                            casesGroup.push(tmp);
+                            structs.push(Utils.getCasesDefine(casesGroup.length));
+                            for (var i = 0, len = casesGroup.length; i < len; i++) {
+                                structs.push(this.parseToStruct(casesGroup[i]));
+                            }
+                        } else if (units[i].type === "begin" && (units[i].beginType === "vmatrix" || units[i].beginType === "pmatrix")) {
+                            var ctype = units[i].beginType;
+                            tmp = [];
+                            j = 0;
+                            casesGroup = [];
+                            casesUnits = units[i];
+                            rows = [];
+                            var index = 0;
+                            i++;
+                            while (casesUnits[j]) {
+                                if (casesUnits[j] === "\\\\") {
+                                    if (!tmp[index]) {
+                                        tmp[index] = [];
+                                    }
+                                    tmp[index].push(this.parseToStruct(rows));
+                                    index = 0;
+                                    rows = [];
+                                } else if (casesUnits[j] === "&") {
+                                    if (!tmp[index]) {
+                                        tmp[index] = [];
+                                    }
+                                    tmp[index].push(this.parseToStruct(rows));
+                                    index++;
+                                    rows = [];
+                                } else {
+                                    rows.push(casesUnits[j]);
+                                }
+                                j++;
+                            }
+                            if (!tmp[index]) {
+                                tmp[index] = [];
+                            }
+                            tmp[index].push(this.parseToStruct(rows));
+                            casesGroup = tmp;
+                            structs.push(Utils.getMatrixDefine(casesGroup.length, casesGroup[0].length, ctype));
+                            for (var i = 0, len = casesGroup[0].length; i < len; i++) {
+                                for (var j = 0, jlen = casesGroup.length; j < jlen; j++) {
+                                    structs.push(casesGroup[j][i]);
+                                }
+                            }
+                        } else if (units[i].type === "begin" && units[i].beginType === "array") {
+                            var ctype = units[i].beginType;
+                            tmp = [];
+                            j = 1;
+                            casesGroup = [];
+                            casesUnits = units[i];
+                            rows = [];
+                            var index = 0;
+                            var align = casesUnits[0];
+                            i++;
+                            while (casesUnits[j]) {
+                                if (casesUnits[j] === "\\\\") {
+                                    if (!tmp[index]) {
+                                        tmp[index] = [];
+                                    }
+                                    tmp[index].push(this.parseToStruct(rows));
+                                    index = 0;
+                                    rows = [];
+                                } else if (casesUnits[j] === "&") {
+                                    if (!tmp[index]) {
+                                        tmp[index] = [];
+                                    }
+                                    tmp[index].push(this.parseToStruct(rows));
+                                    index++;
+                                    rows = [];
+                                } else {
+                                    rows.push(casesUnits[j]);
+                                }
+                                j++;
+                            }
+                            if (!tmp[index]) {
+                                tmp[index] = [];
+                            }
+                            tmp[index].push(this.parseToStruct(rows));
+                            casesGroup = tmp;
+                            structs.push(Utils.getArrayDefine(casesGroup.length, casesGroup[0].length, align, ctype));
+                            for (var i = 0, len = casesGroup[0].length; i < len; i++) {
+                                for (var j = 0, jlen = casesGroup.length; j < jlen; j++) {
+                                    structs.push(casesGroup[j][i]);
+                                }
+                            }
+                        } else if (units[i].type === "begin" && units[i].beginType === "split") {
+                            var ctype = units[i].beginType;
+                            tmp = [];
+                            j = 0;
+                            casesGroup = [];
+                            casesUnits = units[i];
+                            rows = [];
+                            var index = 0;
+                            i++;
+                            while (casesUnits[j]) {
+                                if (casesUnits[j] === "\\\\") {
+                                    j++;
+                                    tmp[index] = this.parseToStruct(rows);
+                                    index++;
+                                    rows = [];
+                                } else if (casesUnits[j] === "&") {
+                                    tmp[index] = this.parseToStruct(rows);
+                                    index++;
+                                    rows = [];
+                                } else {
+                                    rows.push(casesUnits[j]);
+                                }
+                                j++;
+                            }
+                            tmp[index] = this.parseToStruct(rows);
+                            casesGroup = tmp;
+                            structs.push(Utils.getSplitDefine(casesGroup.length));
+                            for (var i = 0, len = casesGroup.length; i < len; i++) {
+                                structs.push(casesGroup[i]);
+                            }
+                        } else {
+                            // 普通组
+                            structs.push(this.parseToStruct(units[i]));
+                        }
+                    } else if (units[i] === "\\underbrace") {
+                        // 跳过underbrace中的下标符号
+                        structs.push(parseStruct(units[i]));
+                        units[i + 2] = null;
+                    } else {
+                        tmp = parseStruct(units[i]);
+                        if (tmp) {
+                            structs.push(tmp);
+                        }
+                    }
+                }
+                return structs;
+            }
+        }));
+        /**
+     * 把序列化的字符串表示法转化为中间格式的结构化表示
+     */
+        function parseStruct(str) {
+            // 特殊控制字符优先处理
+            if (isSpecialCharacter(str)) {
+                return str.substring(1);
+            }
+            switch (Utils.getLatexType(str)) {
+              case "operator":
+                return Utils.getDefine(str);
+
+              case "function":
+                return Utils.getFuncDefine(str);
+
+              default:
+                if (/\\\s*$/.test(str)) {
+                    return "";
+                }
+                // text
+                return transformSpecialCharacters(str);
+            }
+        }
+        // 转换特殊的文本字符
+        function transformSpecialCharacters(char) {
+            if (char.indexOf("\\") === 0) {
+                return char + "\\";
+            }
+            return char;
+        }
+        function isSpecialCharacter(char) {
+            if (char.indexOf("\\") === 0) {
+                return !!SPECIAL_LIST[char.substring(1)];
+            }
+            return false;
+        }
+        function clearEmpty(data) {
+            return data.replace(/\s*([^a-z0-9\s])\s*/gi, function(match, symbol) {
+                return symbol;
+            });
+        }
+    }
+};
+
+/**
  * “开方”预处理器
  */
-_p[39] = {
+_p[40] = {
     value: function() {
         return function(input) {
             return input.replace(/\\(i+)nt(\b|[^a-zA-Z])/g, function(match, sign, suffix) {
@@ -1608,7 +1988,7 @@ _p[39] = {
 /**
  * “双引号”预处理器
  */
-_p[40] = {
+_p[41] = {
     value: function() {
         return function(input) {
             return input.replace(/``/g, "“");
@@ -1619,7 +1999,7 @@ _p[40] = {
 /*!
  * 逆解析处理函数: brackets
  */
-_p[41] = {
+_p[42] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1642,7 +2022,7 @@ _p[41] = {
 /*!
  * 逆解析处理函数: cases
  */
-_p[42] = {
+_p[43] = {
     value: function() {
         /**
      * operands
@@ -1664,7 +2044,7 @@ _p[42] = {
 /*!
  * 逆解析处理函数：combination
  */
-_p[43] = {
+_p[44] = {
     value: function() {
         return function(operands) {
             if (this.attr["data-root"] || this.attr["data-placeholder"]) {
@@ -1678,7 +2058,7 @@ _p[43] = {
 /*!
  * 逆解析处理函数: fraction
  */
-_p[44] = {
+_p[45] = {
     value: function() {
         return function(operands) {
             if (this.callFn) {
@@ -1693,7 +2073,7 @@ _p[44] = {
 /*!
  * 逆解析处理函数: func
  */
-_p[45] = {
+_p[46] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1722,7 +2102,7 @@ _p[45] = {
 /*!
  * 逆解析处理函数: textcircled
  */
-_p[46] = {
+_p[47] = {
     value: function() {
         return function(operands) {
             var name = this.callFn.setType[0];
@@ -1734,7 +2114,7 @@ _p[46] = {
 /*!
  * 逆解析处理函数: integration
  */
-_p[47] = {
+_p[48] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1770,7 +2150,7 @@ _p[47] = {
 /*!
  * 逆解析处理函数: mathbb
  */
-_p[48] = {
+_p[49] = {
     value: function() {
         return function(operands) {
             return "\\mathbb{" + operands[0] + "}";
@@ -1781,7 +2161,7 @@ _p[48] = {
 /*!
  * 逆解析处理函数: mathfrak
  */
-_p[49] = {
+_p[50] = {
     value: function() {
         return function(operands) {
             return "\\mathbf{" + operands[0] + "}";
@@ -1792,7 +2172,7 @@ _p[49] = {
 /*!
  * 逆解析处理函数: mathcal
  */
-_p[50] = {
+_p[51] = {
     value: function() {
         return function(operands) {
             return "\\mathcal{" + operands[0] + "}";
@@ -1803,7 +2183,7 @@ _p[50] = {
 /*!
  * 逆解析处理函数: mathfrak
  */
-_p[51] = {
+_p[52] = {
     value: function() {
         return function(operands) {
             return "\\mathfrak{" + operands[0] + "}";
@@ -1814,7 +2194,7 @@ _p[51] = {
 /*!
  * 逆解析处理函数: mathcal
  */
-_p[52] = {
+_p[53] = {
     value: function() {
         return function(operands) {
             return "\\mathrm{" + operands[0] + "}";
@@ -1825,7 +2205,7 @@ _p[52] = {
 /*!
  * 逆解析处理函数: matrix
  */
-_p[53] = {
+_p[54] = {
     value: function() {
         /**
      * operands
@@ -1843,7 +2223,7 @@ _p[53] = {
 /*!
  * 逆解析处理函数: overline
  */
-_p[54] = {
+_p[55] = {
     value: function() {
         return function(operands) {
             operands = operands[0];
@@ -1855,7 +2235,7 @@ _p[54] = {
     }
 };
 
-_p[55] = {
+_p[56] = {
     value: function() {
         return function(operands) {
             return "\\overparen " + operands[0];
@@ -1866,7 +2246,7 @@ _p[55] = {
 /*!
  * 逆解析处理函数: pmod
  */
-_p[56] = {
+_p[57] = {
     value: function() {
         return function(operands) {
             operands = operands[0];
@@ -1881,7 +2261,7 @@ _p[56] = {
 /*!
  * 逆解析处理函数: product
  */
-_p[57] = {
+_p[58] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1909,7 +2289,7 @@ _p[57] = {
 /*!
  * 逆解析处理函数: script
  */
-_p[58] = {
+_p[59] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1926,7 +2306,7 @@ _p[58] = {
 /*!
  * 逆解析处理函数: split
  */
-_p[59] = {
+_p[60] = {
     value: function() {
         /**
      * operands
@@ -1944,7 +2324,7 @@ _p[59] = {
 /*!
  * 逆解析处理函数: sqrt
  */
-_p[60] = {
+_p[61] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1966,7 +2346,7 @@ _p[60] = {
 /*!
  * 逆解析处理函数: subscript
  */
-_p[61] = {
+_p[62] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -1982,7 +2362,7 @@ _p[61] = {
 /*!
  * 逆解析处理函数: summation
  */
-_p[62] = {
+_p[63] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -2010,7 +2390,7 @@ _p[62] = {
 /*!
  * 逆解析处理函数: superscript
  */
-_p[63] = {
+_p[64] = {
     value: function() {
         /**
      * operands中元素对照表
@@ -2026,7 +2406,7 @@ _p[63] = {
 /*!
  * 逆解析处理函数: textcircled
  */
-_p[64] = {
+_p[65] = {
     value: function() {
         return function(operands) {
             return "\\textcircled{" + operands[0] + "}";
@@ -2037,7 +2417,7 @@ _p[64] = {
 /*!
  * 逆解析处理函数: underbrace
  */
-_p[65] = {
+_p[66] = {
     value: function() {
         /**
      * operands
@@ -2051,7 +2431,7 @@ _p[65] = {
 /**
  * Created by hn on 14-3-20.
  */
-_p[66] = {
+_p[67] = {
     value: function(require) {
         var reverseHandlerTable = _p.r(9), SPECIAL_LIST = _p.r(10), specialCharPattern = /(\\(?:[\w]+)|(?:[^a-z]))\\/gi;
         return function(tree, options) {
@@ -2096,7 +2476,7 @@ _p[66] = {
 /*!
  * Kity Formula 公式表示法Parser接口
  */
-_p[67] = {
+_p[68] = {
     value: function(require, exports, module) {
         // Parser 配置列表
         var CONF = {}, IMPL_POLL = {}, // 内部简单工具类
@@ -2244,9 +2624,9 @@ _p[67] = {
 /*!
  * 启动模块
  */
-_p[68] = {
+_p[69] = {
     value: function(require) {
-        var Parser = _p.r(67).Parser;
+        var Parser = _p.r(68).Parser;
         // 初始化组件
         _p.r(38);
         window.kf.Parser = Parser;
@@ -2255,7 +2635,7 @@ _p[68] = {
 };
 
 var moduleMapping = {
-    "kf.start": 68
+    "kf.start": 69
 };
 
 function use(name) {

@@ -66,6 +66,16 @@ define( function ( require ) {
 
             },
 
+            getArrayDefine: function ( colCount, rowCount, align, name ) {
+
+                return Utils.extend( {
+                    colCount: colCount,
+                    rowCount: rowCount,
+                    align: align
+                }, OPERATOR_LIST[ name ] );
+
+            },
+
             getSplitDefine: function ( params ) {
 
                 return Utils.extend( {

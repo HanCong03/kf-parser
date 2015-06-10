@@ -158,6 +158,13 @@ define( function ( require ) {
             handler: require( "impl/latex/handler/matrix" )
         },
 
+        "array": {
+            name: "array",
+            type: TYPE.FN,
+            sign: false,
+            handler: require( "impl/latex/handler/array" )
+        },
+
         "textcircled": {
             name: "textcircled",
             type: TYPE.FN,

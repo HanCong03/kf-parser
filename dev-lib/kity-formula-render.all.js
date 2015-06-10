@@ -4103,6 +4103,7 @@ _p[30] = {
                 this.operandBox.setAttr("data-type", "kf-editor-exp-operand-box");
                 this.setChildren(0, this.operatorBox);
                 this.setChildren(1, this.operandBox);
+                this.color = null;
             },
             // 操作符存储在第1位置
             setOperator: function(operator) {
@@ -4143,8 +4144,23 @@ _p[30] = {
             getOperands: function() {
                 return this.operands;
             },
-            addedCall: function() {
-                this.operator && this.operator.applyOperand.apply(this.operator, this.operands);
+            addedCall: function(color) {
+                if (!this.operator) {
+                    return this;
+                }
+                this.operator.applyOperand.apply(this.operator, this.operands);
+                var shapeNode = this.operator.node;
+                var pathNodes = shapeNode.getElementsByTagName("path");
+                var node;
+                var type;
+                for (var i = 0, len = pathNodes.length; i < len; i++) {
+                    node = pathNodes[i];
+                    type = node.getAttribute("shapeflag");
+                    if (type !== null) {
+                        console.log("发现", node.id);
+                        node.setAttribute("fill", color);
+                    }
+                }
                 return this;
             }
         });
@@ -4999,6 +5015,7 @@ _p[42] = {
  */
 _p[43] = {
     value: function(require) {
+        var DEFAULT_COLOR = _p.r(70).color;
         var kity = _p.r(46), GTYPE = _p.r(6), FontManager = _p.r(36), FontInstaller = _p.r(35), DEFAULT_OPTIONS = {
             fontsize: 50,
             autoresize: true,
@@ -5040,9 +5057,17 @@ _p[43] = {
                 this.config = kity.Utils.extend({}, DEFAULT_OPTIONS, config);
                 this.initEnvironment();
                 this.initInnerFont();
+                this.setColor(this.config.color || DEFAULT_COLOR);
             },
             getContentContainer: function() {
                 return this.container;
+            },
+            getColor: function() {
+                return this.color;
+            },
+            setColor: function(color) {
+                this.color = color;
+                this.container.fill(this.color);
             },
             initEnvironment: function() {
                 this.zoom = this.config.fontsize / 50;
@@ -5071,8 +5096,9 @@ _p[43] = {
                 // clear zoom
                 this.container.clearTransform();
                 this.expressions.splice(index, 0, expWrap.getWrapShape());
-                this.addShape(expWrap.getWrapShape());
-                notifyExpression.call(this, expWrap.getExpression());
+                var shape = expWrap.getWrapShape();
+                this.addShape(shape);
+                notifyExpression.call(this, expWrap.getExpression(), this.color);
                 expWrap.resize();
                 correctOffset.call(this);
                 this.resetZoom();
@@ -5133,24 +5159,24 @@ _p[43] = {
             return this;
         }
         // 通知表达式已接入到paper
-        function notifyExpression(expression) {
+        function notifyExpression(expression, color) {
             var len = 0;
             if (!expression) {
                 return;
             }
             if (expression.getType() === GTYPE.EXP) {
                 for (var i = 0, len = expression.getChildren().length; i < len; i++) {
-                    notifyExpression(expression.getChild(i));
+                    notifyExpression(expression.getChild(i), color);
                 }
             } else if (expression.getType() === GTYPE.COMPOUND_EXP) {
                 // 操作数处理
                 for (var i = 0, len = expression.getOperands().length; i < len; i++) {
-                    notifyExpression(expression.getOperand(i));
+                    notifyExpression(expression.getOperand(i), color);
                 }
                 // 处理操作符
-                notifyExpression(expression.getOperator());
+                notifyExpression(expression.getOperator(), color);
             }
-            expression.addedCall && expression.addedCall();
+            expression.addedCall && expression.addedCall(color);
         }
         return Formula;
     }
@@ -5363,6 +5389,7 @@ _p[48] = {
                 leftBox = leftShape.getFixRenderBox();
                 offset += leftBox.width;
                 offset = Math.floor(offset);
+                leftShape.setAttr("shapeflag", "1");
             }
             exp.translate(offset, 0);
             offset += expBox.width + 5;
@@ -5374,6 +5401,7 @@ _p[48] = {
                 scale = expBox.height / rightBox.height;
                 rightShape.scale(scale > 1 ? 1 : scale, scale);
                 rightShape.translate(offset, 0);
+                rightShape.setAttr("shapeflag", "1");
             }
         }
     }
@@ -5409,6 +5437,9 @@ _p[49] = {
             },
             getOperatorShape: function(height) {
                 var group = new kity.Group(), lineWidth = 4.8, shapes = [ new kity.Path(sign1).fill("black"), new kity.Path(sign2).fill("black"), new kity.Path(sign3).fill("black"), new kity.Rect(lineWidth, 0).fill("black"), new kity.Rect(lineWidth, 0).fill("black") ], box = [], offset = 0, originHeight = 0;
+                shapes.forEach(function(shape) {
+                    shape.setAttr("shapeflag", "1");
+                });
                 this.addOperatorShape(group);
                 for (var i = 0; i < 5; i++) {
                     group.addShape(shapes[i]);
@@ -5709,7 +5740,9 @@ _p[52] = {
             }
         });
         function generateOperator(width, overflow) {
-            return new kity.Rect(width + overflow * 2, 1).fill("black");
+            var shape = new kity.Rect(width + overflow * 2, 1).fill("black");
+            shape.setAttr("shapeflag", "1");
+            return shape;
         }
     }
 };
@@ -5820,11 +5853,14 @@ _p[54] = {
                     return this.getOverrightarrow(width);
                 }
                 opShape = new kity.Path(pathData).fill("black");
+                opShape.setAttr("shapeflag", "1");
                 this.addOperatorShape(opShape);
                 return opShape;
             },
             getOverrightarrow: function(width) {
                 var group = new kity.Group(), height = 2.4, pathData = "M15.103,0.896c0.128,0.896,0.512,1.664,0.96,2.432c0.704,1.024,1.664,1.856,2.816,2.304   c0.448,0.192,0.704,0.448,0.704,0.896c0,0.512-0.256,0.768-0.704,0.96C17.727,8,16.767,8.768,16.063,9.855   c-0.448,0.704-0.832,1.536-0.96,2.368c-0.128,0.768-0.512,0.896-1.344,0.896c-0.576,0-1.024-0.256-1.024-1.024   c0-0.704,0.704-2.88,1.984-4.352H0.96C0.448,7.744,0,6.976,0,6.527C0,6.08,0.448,5.375,0.96,5.375h13.759   c-1.28-1.408-1.984-3.647-1.984-4.352S13.183,0,13.759,0C14.591,0,14.975,0.192,15.103,0.896z", arrowShape = new kity.Path(pathData).fill("black"), lineShape = new kity.Rect(0, height).fill("black"), box = null;
+                arrowShape.setAttr("shapeflag", "1");
+                lineShape.setAttr("shapeflag", "1");
                 group.addShape(arrowShape);
                 group.addShape(lineShape);
                 this.addOperatorShape(group);
@@ -5885,6 +5921,7 @@ _p[55] = {
             getOperatorShape: function() {
                 var pathData = "M1.318,48.226c0,0,0.044,0.066,0.134,0.134c0.292,0.313,0.626,0.447,1.006,0.447c0.246,0.022,0.358-0.044,0.604-0.268   c0.782-0.782,1.497-2.838,2.324-6.727c0.514-2.369,0.938-4.693,1.586-8.448C8.559,24.068,9.9,17.878,11.978,9.52   c0.917-3.553,1.922-7.576,3.866-8.983C16.247,0.246,16.739,0,17.274,0c1.564,0,2.503,1.162,2.592,2.57   c0,0.827-0.424,1.386-1.273,1.386c-0.671,0-1.229-0.514-1.229-1.251c0-0.805,0.514-1.095,1.185-1.274   c0.022,0-0.291-0.29-0.425-0.379c-0.201-0.134-0.514-0.224-0.737-0.224c-0.067,0-0.112,0-0.157,0.022   c-0.469,0.134-0.983,0.939-1.453,2.234c-0.537,1.475-0.961,3.174-1.631,6.548c-0.424,2.101-0.693,3.464-1.229,6.727   c-1.608,9.185-2.949,15.487-5.006,23.756c-0.514,2.034-0.849,3.24-1.207,4.335c-0.559,1.698-1.162,2.95-1.811,3.799   c-0.514,0.715-1.385,1.408-2.436,1.408c-1.363,0-2.391-1.185-2.458-2.592c0-0.804,0.447-1.363,1.273-1.363   c0.671,0,1.229,0.514,1.229,1.251C2.503,47.757,1.989,48.047,1.318,48.226z", group = new kity.Group(), opGroup = new kity.Group(), opShape = new kity.Path(pathData).fill("black"), opBox = new kity.Rect(0, 0, 0, 0).fill("transparent"), tmpShape = null;
                 opGroup.addShape(opShape);
+                opShape.setAttr("shapeflag", "1");
                 group.addShape(opBox);
                 group.addShape(opGroup);
                 this.addOperatorShape(group);
@@ -5990,6 +6027,10 @@ _p[56] = {
                 shapeBottom1 = new kity.Path(pathData[3]).fill("black");
                 shapeTop2 = new kity.Path(pathData[4]).fill("black");
                 shapeBottom2 = new kity.Path(pathData[5]).fill("black");
+                shapeTop1.setAttr("shapeflag", "1");
+                shapeBottom1.setAttr("shapeflag", "1");
+                shapeTop2.setAttr("shapeflag", "1");
+                shapeBottom2.setAttr("shapeflag", "1");
                 leftShape.addShape(shapeTop1);
                 leftShape.addShape(shapeBottom1);
                 rightShape.addShape(shapeTop2);
@@ -6001,6 +6042,8 @@ _p[56] = {
                 if (diff > 0) {
                     lineShape1 = new kity.Rect(width, diff).fill("black");
                     lineShape2 = new kity.Rect(width, diff).fill("black");
+                    lineShape1.setAttr("shapeflag", "1");
+                    lineShape2.setAttr("shapeflag", "1");
                     leftShape.addShape(lineShape1);
                     rightShape.addShape(lineShape2);
                     offset = topHeight;
@@ -6022,6 +6065,8 @@ _p[56] = {
             },
             createVShape: function(box) {
                 var group = new kity.Group(), leftShape = new kity.Rect(3, box.height).fill("black"), rightShape = new kity.Rect(3, box.height).fill("black");
+                leftShape.setAttr("shapeflag", "1");
+                rightShape.setAttr("shapeflag", "1");
                 group.addShape(leftShape);
                 group.addShape(rightShape);
                 this.addOperatorShape(group);
@@ -6094,7 +6139,9 @@ _p[58] = {
                 this.parentExpression.translateElement(padding, padding);
             },
             getOperatorShape: function(width) {
-                return new kity.Rect(width, 3).fill("black");
+                var shape = new kity.Rect(width, 3).fill("black");
+                shape.setAttr("shapeflag", "1");
+                return shape;
             }
         });
     }
@@ -6110,6 +6157,7 @@ _p[59] = {
             },
             applyOperand: function(exp) {
                 var pathData = "M0.527,7.805H0c0.727-1.43,1.57-2.619,2.531-3.568c1.359-1.359,2.971-2.405,4.834-3.138S11.156,0,13.148,0   c2.93,0,5.599,0.721,8.007,2.162s4.134,3.322,5.177,5.643h-0.598c-0.645-1.16-1.523-2.112-2.637-2.856s-2.522-1.301-4.228-1.67   s-3.489-0.554-5.353-0.554c-2.016,0-3.85,0.158-5.502,0.475C6.715,3.434,5.672,3.727,4.887,4.078S3.346,4.901,2.619,5.493   S1.195,6.855,0.527,7.805z", opShape = new kity.Path(pathData).fill("black"), expBox = exp.getFixRenderBox(), opBox = null, scale = 0;
+                opShape.setAttr("shapeflag", "1");
                 this.addOperatorShape(opShape);
                 opBox = opShape.getFixRenderBox();
                 scale = expBox.width / opBox.width;
@@ -6139,6 +6187,8 @@ _p[60] = {
             },
             createOperatorShape: function(exprBox) {
                 var leftBracket = new kity.Path("M10.657,48.004c-0.48,0-4.608-3.12-7.489-9.025C0.528,33.555,0,27.746,0,24.002c0-4.032,0.576-9.361,3.024-14.641   C5.857,3.264,10.177,0,10.657,0c0.288,0,0.48,0.144,0.48,0.48c0,0.144,0,0.24-0.624,0.816c-5.905,6-7.729,14.354-7.729,22.706   c0,7.345,1.536,16.417,7.537,22.466c0.816,0.816,0.816,0.912,0.816,1.056C11.137,47.86,10.945,48.004,10.657,48.004z").fill("black"), rightBracket = new kity.Path("M8.112,38.643C5.28,44.74,0.96,48.004,0.48,48.004c-0.288,0-0.48-0.192-0.48-0.48c0-0.144,0-0.24,0.624-0.816   c5.952-6.049,7.729-14.498,7.729-22.706c0-10.033-2.736-17.666-7.441-22.418C0,0.72,0,0.624,0,0.48C0,0.192,0.192,0,0.48,0   c0.48,0,4.608,3.12,7.488,9.024c2.641,5.425,3.168,11.233,3.168,14.978C11.137,28.034,10.561,33.363,8.112,38.643z").fill("black"), mod = new Text("mod", "KF AMS ROMAN"), group = new kity.Group(), diff = 0, space = {};
+                leftBracket.setAttr("shapeflag", "1");
+                rightBracket.setAttr("shapeflag", "1");
                 group.addShape(leftBracket);
                 group.addShape(rightBracket);
                 group.addShape(mod);
@@ -6191,6 +6241,7 @@ _p[61] = {
             },
             getOperatorShape: function() {
                 var pathData = "M27.842,28.898c0,1.728,0.096,2.256,3.792,2.256h1.152v1.488c-1.68-0.144-5.28-0.144-7.104-0.144s-5.376,0-7.057,0.144   v-1.488h1.152c3.696,0,3.792-0.528,3.792-2.256V1.488H9.217v27.411c0,1.728,0.096,2.256,3.792,2.256h1.152v1.488   c-1.68-0.144-5.28-0.144-7.104-0.144s-5.376,0-7.057,0.144v-1.488h1.152c3.696,0,3.792-0.528,3.792-2.256V3.744   c0-1.728-0.096-2.256-3.792-2.256H0V0h32.787v1.488h-1.152c-3.696,0-3.792,0.528-3.792,2.256V28.898z", operatorShape = new kity.Path(pathData).fill("black"), opBgShape = new kity.Rect(0, 0, 0, 0).fill("transparent"), group = new kity.Group(), opRenderBox = null;
+                operatorShape.setAttr("shapeflag", "1");
                 group.addShape(opBgShape);
                 group.addShape(operatorShape);
                 operatorShape.scale(1.6);
@@ -6251,6 +6302,7 @@ _p[62] = {
             drawer.lineBy(sin15 * a * 3, -cos15 * a * 3);
             drawer.lineBy(-sin15 * h, -h);
             drawer.close();
+            shape.setAttr("shapeflag", "1");
             return shape.fill("black");
         }
         // 根据操作数生成根号的竖直线部分
@@ -6262,13 +6314,16 @@ _p[62] = {
             drawer.lineBy(sin15 * SHAPE_DATA_WIDTH * 3, cos15 * SHAPE_DATA_WIDTH * 3);
             drawer.lineBy(tan15 * h + sin15 * SHAPE_DATA_WIDTH * 3, -(h + 3 * SHAPE_DATA_WIDTH * cos15));
             drawer.close();
+            shape.setAttr("shapeflag", "1");
             return shape.fill("black");
         }
         // 根据操作数生成根号的水平线部分
         function generateHLine(operand) {
             // 表达式宽度
             var w = operand.getWidth() + 2 * SHAPE_DATA_WIDTH;
-            return new kity.Rect(w, 2 * SHAPE_DATA_WIDTH).fill("black");
+            var shape = new kity.Rect(w, 2 * SHAPE_DATA_WIDTH).fill("black");
+            shape.setAttr("shapeflag", "1");
+            return shape;
         }
         // 合并根号的各个部分， 并返回根号的关键点位置数据
         function mergeShape(decoration, vLine, hLine) {
@@ -6395,6 +6450,7 @@ _p[65] = {
             },
             getOperatorShape: function() {
                 var pathData = "M0.672,33.603c-0.432,0-0.648,0-0.648-0.264c0-0.024,0-0.144,0.24-0.432l12.433-14.569L0,0.96c0-0.264,0-0.72,0.024-0.792   C0.096,0.024,0.12,0,0.672,0h28.371l2.904,6.745h-0.6C30.531,4.8,28.898,3.72,28.298,3.336c-1.896-1.2-3.984-1.608-5.28-1.8   c-0.216-0.048-2.4-0.384-5.617-0.384H4.248l11.185,15.289c0.168,0.24,0.168,0.312,0.168,0.36c0,0.12-0.048,0.192-0.216,0.384   L3.168,31.515h14.474c4.608,0,6.96-0.624,7.464-0.744c2.76-0.72,5.305-2.352,6.241-4.848h0.6l-2.904,7.681H0.672z", operatorShape = new kity.Path(pathData).fill("black"), opBgShape = new kity.Rect(0, 0, 0, 0).fill("transparent"), group = new kity.Group(), opRenderBox = null;
+                operatorShape.setAttr("shapeflag", "1");
                 group.addShape(opBgShape);
                 group.addShape(operatorShape);
                 operatorShape.scale(1.6);
@@ -6456,6 +6512,11 @@ _p[67] = {
             },
             getOperatorShape: function(width) {
                 var lineWidth = 5, diff = 2, length = width < 73 ? 5 : 5 + ((width - 73) / 2 | 0) + 1, offset = 0, shape1 = new kity.Path(signData[0]).fill("black"), shape2 = new kity.Path(signData[1]).fill("black"), shape3 = new kity.Path(signData[2]).fill("black"), leftLine = new kity.Rect(length, lineWidth).fill("black"), rightLine = new kity.Rect(length, lineWidth).fill("black"), box = [], group = new kity.Group();
+                shape1.setAttr("shapeflag", "1");
+                shape2.setAttr("shapeflag", "1");
+                shape3.setAttr("shapeflag", "1");
+                leftLine.setAttr("shapeflag", "1");
+                rightLine.setAttr("shapeflag", "1");
                 group.addShape(shape1);
                 group.addShape(shape2);
                 group.addShape(shape3);
@@ -6590,6 +6651,7 @@ _p[70] = {
                 // 系统字体列表
                 list: [ _p.r(41), _p.r(39), _p.r(40), _p.r(37), _p.r(38), _p.r(42) ]
             },
+            color: "#000000",
             /*------------------------- 资源配置*/
             resource: {
                 path: "src/resource/"

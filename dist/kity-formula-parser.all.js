@@ -37,6 +37,7 @@ var _p = {
     }
 };
 
+//src/assembly.js
 /*!
  * 装配器
  */
@@ -209,6 +210,7 @@ _p[0] = {
     }
 };
 
+//src/impl/latex/base/latex-utils.js
 /**
  * latex实现工具包
  */
@@ -221,6 +223,7 @@ _p[1] = {
     }
 };
 
+//src/impl/latex/base/rpn.js
 _p[2] = {
     value: function(require) {
         var Utils = _p.r(4);
@@ -265,6 +268,7 @@ _p[2] = {
     }
 };
 
+//src/impl/latex/base/tree.js
 /**
  * 从单元组构建树
  */
@@ -292,6 +296,7 @@ _p[3] = {
     }
 };
 
+//src/impl/latex/base/utils.js
 /**
  * 通用工具包
  */
@@ -364,6 +369,7 @@ _p[4] = {
     }
 };
 
+//src/impl/latex/define/brackets.js
 /**
  * 定义括号类型， 对于属于括号类型的符号或表达式， 则可以应用brackets函数处理
  */
@@ -390,6 +396,7 @@ _p[5] = {
     }
 };
 
+//src/impl/latex/define/func.js
 /**
  * 函数列表
  */
@@ -432,6 +439,7 @@ _p[6] = {
     }
 };
 
+//src/impl/latex/define/operator.js
 /**
  * 操作符列表
  */
@@ -605,6 +613,7 @@ _p[7] = {
     }
 };
 
+//src/impl/latex/define/pre.js
 /**
  * 预处理器列表
  */
@@ -619,6 +628,7 @@ _p[8] = {
     }
 };
 
+//src/impl/latex/define/reverse.js
 /*!
  * 逆解析对照表
  */
@@ -656,6 +666,7 @@ _p[9] = {
     }
 };
 
+//src/impl/latex/define/special.js
 /*!
  * 特殊字符定义
  */
@@ -675,6 +686,7 @@ _p[10] = {
     }
 };
 
+//src/impl/latex/define/type.js
 /**
  * 操作符类型定义
  */
@@ -687,6 +699,7 @@ _p[11] = {
     }
 };
 
+//src/impl/latex/handler/array.js
 /*!
  * array处理器
  */
@@ -711,6 +724,7 @@ _p[12] = {
     }
 };
 
+//src/impl/latex/handler/brackets.js
 /*!
  * 括号处理器
  */
@@ -736,6 +750,7 @@ _p[13] = {
     }
 };
 
+//src/impl/latex/handler/cases.js
 /*!
  * cases处理器
  */
@@ -754,6 +769,7 @@ _p[14] = {
     }
 };
 
+//src/impl/latex/handler/combination.js
 /*!
  * 合并处理(特殊处理函数)
  */
@@ -768,6 +784,7 @@ _p[15] = {
     }
 };
 
+//src/impl/latex/handler/dfrac.js
 /*!
  * 分数函数处理器
  */
@@ -797,6 +814,7 @@ _p[16] = {
     }
 };
 
+//src/impl/latex/handler/fraction.js
 /*!
  * 分数函数处理器
  */
@@ -823,6 +841,7 @@ _p[17] = {
     }
 };
 
+//src/impl/latex/handler/func.js
 /*!
  * 函数表达式处理器
  */
@@ -843,6 +862,7 @@ _p[18] = {
     }
 };
 
+//src/impl/latex/handler/hat.js
 /*!
  * 分数函数处理器
  */
@@ -862,6 +882,7 @@ _p[19] = {
     }
 };
 
+//src/impl/latex/handler/integration.js
 /*!
  * 积分函数处理器
  */
@@ -884,6 +905,7 @@ _p[20] = {
     }
 };
 
+//src/impl/latex/handler/lib/script-extractor.js
 /*!
  * 通用上下标提取器
  */
@@ -936,6 +958,7 @@ _p[21] = {
     }
 };
 
+//src/impl/latex/handler/mathbb.js
 /*!
  * 双线处理
  */
@@ -960,6 +983,7 @@ _p[22] = {
     }
 };
 
+//src/impl/latex/handler/mathbf.js
 /*!
  * 罗马处理
  */
@@ -984,6 +1008,7 @@ _p[23] = {
     }
 };
 
+//src/impl/latex/handler/mathcal.js
 /*!
  * 手写体处理
  */
@@ -1008,6 +1033,7 @@ _p[24] = {
     }
 };
 
+//src/impl/latex/handler/mathfrak.js
 /*!
  * 花体处理
  */
@@ -1032,6 +1058,7 @@ _p[25] = {
     }
 };
 
+//src/impl/latex/handler/mathrm.js
 /*!
  * 罗马处理
  */
@@ -1056,6 +1083,7 @@ _p[26] = {
     }
 };
 
+//src/impl/latex/handler/matrix.js
 _p[27] = {
     value: function() {
         // 处理函数接口
@@ -1078,6 +1106,7 @@ _p[27] = {
     }
 };
 
+//src/impl/latex/handler/overline.js
 /*!
  * overline 上划线
  */
@@ -1092,6 +1121,7 @@ _p[28] = {
     }
 };
 
+//src/impl/latex/handler/overparen.js
 _p[29] = {
     value: function() {
         return function(info, processedStack, unprocessedStack) {
@@ -1103,6 +1133,7 @@ _p[29] = {
     }
 };
 
+//src/impl/latex/handler/pmod.js
 /*!
  * pmod
  */
@@ -1117,6 +1148,7 @@ _p[30] = {
     }
 };
 
+//src/impl/latex/handler/product.js
 /*!
  * 连乘函数处理器
  */
@@ -1135,6 +1167,7 @@ _p[31] = {
     }
 };
 
+//src/impl/latex/handler/script.js
 /*!
  * 上下标操作符函数处理
  */
@@ -1169,6 +1202,7 @@ _p[32] = {
     }
 };
 
+//src/impl/latex/handler/split.js
 /*!
  * split处理器
  */
@@ -1187,6 +1221,7 @@ _p[33] = {
     }
 };
 
+//src/impl/latex/handler/sqrt.js
 /*!
  * 方根函数处理器
  */
@@ -1222,6 +1257,7 @@ _p[34] = {
     }
 };
 
+//src/impl/latex/handler/summation.js
 /*!
  * 求和函数处理器
  */
@@ -1240,6 +1276,7 @@ _p[35] = {
     }
 };
 
+//src/impl/latex/handler/textcircled.js
 /*!
  * 带圈的数字
  */
@@ -1257,6 +1294,7 @@ _p[36] = {
     }
 };
 
+//src/impl/latex/handler/underbrace.js
 /*!
  * 下支撑结构处理器
  */
@@ -1270,6 +1308,7 @@ _p[37] = {
     }
 };
 
+//src/impl/latex/latex.js
 /**
  * Kity Formula Latex解析器实现
  */
@@ -1278,7 +1317,7 @@ _p[38] = {
     value: function(require) {
         var Parser = _p.r(68).Parser, LatexUtils = _p.r(1), PRE_HANDLER = _p.r(8), serialization = _p.r(67), OP_DEFINE = _p.r(7), REVERSE_DEFINE = _p.r(9), SPECIAL_LIST = _p.r(10), Utils = _p.r(4);
         // data
-        var leftChar = "￸", rightChar = "￼", splitChar = "﻿", clearCharPattern = new RegExp(leftChar + "|" + rightChar, "g"), leftCharPattern = new RegExp(leftChar, "g"), rightCharPattern = new RegExp(rightChar, "g");
+        var leftChar = "￸", rightChar = "￼", splitChar = "\ufeff", clearCharPattern = new RegExp(leftChar + "|" + rightChar, "g"), leftCharPattern = new RegExp(leftChar, "g"), rightCharPattern = new RegExp(rightChar, "g");
         Parser.register("latex", Parser.implement({
             parse: function(data) {
                 var units = this.split(this.format(data));
@@ -1649,6 +1688,7 @@ _p[38] = {
     }
 };
 
+//src/impl/latex/pre/int.js
 /**
  * “开方”预处理器
  */
@@ -1662,6 +1702,7 @@ _p[39] = {
     }
 };
 
+//src/impl/latex/pre/quot.js
 /**
  * “双引号”预处理器
  */
@@ -1673,6 +1714,7 @@ _p[40] = {
     }
 };
 
+//src/impl/latex/reverse/array.js
 /*!
  * 逆解析处理函数: matrix
  */
@@ -1692,6 +1734,7 @@ _p[41] = {
     }
 };
 
+//src/impl/latex/reverse/brackets.js
 /*!
  * 逆解析处理函数: brackets
  */
@@ -1715,6 +1758,7 @@ _p[42] = {
     }
 };
 
+//src/impl/latex/reverse/cases.js
 /*!
  * 逆解析处理函数: cases
  */
@@ -1737,6 +1781,7 @@ _p[43] = {
     }
 };
 
+//src/impl/latex/reverse/combination.js
 /*!
  * 逆解析处理函数：combination
  */
@@ -1751,6 +1796,7 @@ _p[44] = {
     }
 };
 
+//src/impl/latex/reverse/fraction.js
 /*!
  * 逆解析处理函数: fraction
  */
@@ -1766,6 +1812,7 @@ _p[45] = {
     }
 };
 
+//src/impl/latex/reverse/func.js
 /*!
  * 逆解析处理函数: func
  */
@@ -1795,6 +1842,7 @@ _p[46] = {
     }
 };
 
+//src/impl/latex/reverse/hat.js
 /*!
  * 逆解析处理函数: textcircled
  */
@@ -1807,6 +1855,7 @@ _p[47] = {
     }
 };
 
+//src/impl/latex/reverse/integration.js
 /*!
  * 逆解析处理函数: integration
  */
@@ -1843,6 +1892,7 @@ _p[48] = {
     }
 };
 
+//src/impl/latex/reverse/mathbb.js
 /*!
  * 逆解析处理函数: mathbb
  */
@@ -1854,6 +1904,7 @@ _p[49] = {
     }
 };
 
+//src/impl/latex/reverse/mathbf.js
 /*!
  * 逆解析处理函数: mathfrak
  */
@@ -1865,6 +1916,7 @@ _p[50] = {
     }
 };
 
+//src/impl/latex/reverse/mathcal.js
 /*!
  * 逆解析处理函数: mathcal
  */
@@ -1876,6 +1928,7 @@ _p[51] = {
     }
 };
 
+//src/impl/latex/reverse/mathfrak.js
 /*!
  * 逆解析处理函数: mathfrak
  */
@@ -1887,6 +1940,7 @@ _p[52] = {
     }
 };
 
+//src/impl/latex/reverse/mathrm.js
 /*!
  * 逆解析处理函数: mathcal
  */
@@ -1898,6 +1952,7 @@ _p[53] = {
     }
 };
 
+//src/impl/latex/reverse/matrix.js
 /*!
  * 逆解析处理函数: matrix
  */
@@ -1916,6 +1971,7 @@ _p[54] = {
     }
 };
 
+//src/impl/latex/reverse/overline.js
 /*!
  * 逆解析处理函数: overline
  */
@@ -1931,6 +1987,7 @@ _p[55] = {
     }
 };
 
+//src/impl/latex/reverse/overparen.js
 _p[56] = {
     value: function() {
         return function(operands) {
@@ -1939,6 +1996,7 @@ _p[56] = {
     }
 };
 
+//src/impl/latex/reverse/pmod.js
 /*!
  * 逆解析处理函数: pmod
  */
@@ -1954,6 +2012,7 @@ _p[57] = {
     }
 };
 
+//src/impl/latex/reverse/product.js
 /*!
  * 逆解析处理函数: product
  */
@@ -1982,6 +2041,7 @@ _p[58] = {
     }
 };
 
+//src/impl/latex/reverse/script.js
 /*!
  * 逆解析处理函数: script
  */
@@ -1999,6 +2059,7 @@ _p[59] = {
     }
 };
 
+//src/impl/latex/reverse/split.js
 /*!
  * 逆解析处理函数: split
  */
@@ -2017,6 +2078,7 @@ _p[60] = {
     }
 };
 
+//src/impl/latex/reverse/sqrt.js
 /*!
  * 逆解析处理函数: sqrt
  */
@@ -2039,6 +2101,7 @@ _p[61] = {
     }
 };
 
+//src/impl/latex/reverse/subscript.js
 /*!
  * 逆解析处理函数: subscript
  */
@@ -2055,6 +2118,7 @@ _p[62] = {
     }
 };
 
+//src/impl/latex/reverse/summation.js
 /*!
  * 逆解析处理函数: summation
  */
@@ -2083,6 +2147,7 @@ _p[63] = {
     }
 };
 
+//src/impl/latex/reverse/superscript.js
 /*!
  * 逆解析处理函数: superscript
  */
@@ -2099,6 +2164,7 @@ _p[64] = {
     }
 };
 
+//src/impl/latex/reverse/textcircled.js
 /*!
  * 逆解析处理函数: textcircled
  */
@@ -2110,6 +2176,7 @@ _p[65] = {
     }
 };
 
+//src/impl/latex/reverse/underbrace.js
 /*!
  * 逆解析处理函数: underbrace
  */
@@ -2124,6 +2191,7 @@ _p[66] = {
     }
 };
 
+//src/impl/latex/serialization.js
 /**
  * Created by hn on 14-3-20.
  */
@@ -2169,6 +2237,7 @@ _p[67] = {
     }
 };
 
+//src/parser.js
 /*!
  * Kity Formula 公式表示法Parser接口
  */
@@ -2317,6 +2386,7 @@ _p[68] = {
     }
 };
 
+//dev-lib/start.js
 /*!
  * 启动模块
  */

@@ -41,7 +41,6 @@ define(function (require) {
         },
 
         expand: function (expandObj) {
-
             var parseObj = expandObj.parse,
                 formatKey = null,
                 preObj = expandObj.pre,
